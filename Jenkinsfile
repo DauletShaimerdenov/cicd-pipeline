@@ -59,6 +59,12 @@ pipeline {
         }
       }
     }
+    stage('Fix Permissions after Build') {
+        agent { docker { image 'node:18' args '-u root:root' } }
+        steps {
+          sh 'chown -R ${JENKINS_UID}:${JENKINS_GID} node_modules'
+        }
+    }
 stage('Application Test') {
   agent {
     docker {
