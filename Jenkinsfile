@@ -2,6 +2,8 @@ pipeline {
   agent any
   
   environment {
+    JENKINS_UID = sh(script: "id -u jenkins", returnStdout: true).trim()
+    JENKINS_GID = sh(script: "id -g jenkins", returnStdout: true).trim()
     PROJECT_NAME = "CI/CD Pipeline Demo"
     BUILD_NUMBER = "${env.BUILD_NUMBER}"
     IMAGE_NAME = "dauletshaimerdenov/node-demo"
@@ -38,7 +40,7 @@ pipeline {
       agent {
         docker {
             image 'node:7.8.0'
-            args '-u 1000:1000 -v /var/run/docker.sock:/var/run/docker.sock'
+            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
             
@@ -61,7 +63,7 @@ pipeline {
         agent {
             docker {
                 image 'node:7.8.0'
-                args '-u 1000:1000 -v /var/run/docker.sock:/var/run/docker.sock'
+                args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
             }
         }
         steps {
