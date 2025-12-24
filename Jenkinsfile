@@ -34,7 +34,7 @@ pipeline {
       steps {
         sh '''
            set -e
-           test -f script/build.sh
+           test -f scripts/build.sh
            
            echo "🚀 Building application..."
            chmod +x scripts/build.sh
