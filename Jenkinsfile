@@ -100,7 +100,7 @@ stage('Application Test') {
             agent {
                 docker {
                     image "${DOCKER_AGENT_IMAGE}"
-                    args "-v /var/run/docker.sock:/var/run/docker.sock"
+                    args "-u root:root -v /var/run/docker.sock:/var/run/docker.sock"
                 }
             }
             steps {
@@ -115,7 +115,7 @@ stage('Application Test') {
             agent {
                 docker {
                     image "${DOCKER_AGENT_IMAGE}"
-                    args "-v /var/run/docker.sock:/var/run/docker.sock"
+                    args "-u root:root -v /var/run/docker.sock:/var/run/docker.sock"
                 }
             }
             steps {
