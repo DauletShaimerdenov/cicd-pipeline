@@ -14,8 +14,8 @@ pipeline {
     
     stage('Cleanup Workspace') {
             steps {
-                echo '🧹 Cleaning workspace before build as root...'
-                sh 'sudo rm -rf $WORKSPACE/*'
+                echo '🧹 Cleaning workspace before build...'
+                deleteDir()
                 echo '✅ Workspace cleaned'
             }
     }
