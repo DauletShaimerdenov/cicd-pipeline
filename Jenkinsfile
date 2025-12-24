@@ -37,7 +37,7 @@ pipeline {
       agent {
         docker {
             image 'node:7.8.0'
-            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
       }
             
@@ -57,7 +57,7 @@ pipeline {
       agent {
         docker {
             image 'node:7.8.0'
-            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
       }
       steps {
