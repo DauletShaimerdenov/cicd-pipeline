@@ -7,14 +7,15 @@ pipeline {
     IMAGE_NAME = "dauletshaimerdenov/node-demo"
     IMAGE_TAG  = "${BUILD_NUMBER}"
     DOCKER_AGENT_IMAGE = "docker:20.10.24" // образ с Docker CLI
+    NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
   }
 
   stages {
     
     stage('Cleanup Workspace') {
             steps {
-                echo '🧹 Cleaning workspace before build...'
-                deleteDir()
+                echo '🧹 Cleaning workspace before build as root...'
+                sh 'sudo rm -rf $WORKSPACE/*'
                 echo '✅ Workspace cleaned'
             }
     }
@@ -42,30 +43,41 @@ pipeline {
       }
             
       steps {
-        sh '''
-           set -e
-           test -f scripts/build.sh
-           
-           echo "🚀 Building application..."
-           chmod +x scripts/build.sh
-           ./scripts/build.sh
-          '''
-      }
-    }
+        script {
+          echo "🚀 Building application..."
+          sh 'chmod +x scripts/build.sh'
 
-    stage('Application Test') {
-      agent {
-        docker {
-            image 'node:7.8.0'
-            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+          withEnv(["NPM_CONFIG_CACHE=${WORKSPACE}/.npm"]) {
+            sh '''
+                set -e
+                test -f scripts/build.sh
+                ./scripts/build.sh
+            '''
+          }
         }
       }
-      steps {
-        sh '''
-            chmod +x scripts/test.sh
-            ./scripts/test.sh
-        '''
-      }
+    }
+    stage('Application Test') {
+        agent {
+            docker {
+                image 'node:7.8.0'
+                args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+            }
+        }
+        steps {
+            script {
+                echo "🧪 Running application tests..."
+                sh 'chmod +x scripts/test.sh'
+
+                withEnv(["NPM_CONFIG_CACHE=${WORKSPACE}/.npm"]) {
+                    sh '''
+                        set -e
+                        test -f scripts/test.sh
+                        ./scripts/test.sh
+                    '''
+                }
+            }
+        }
     }
     
   }
