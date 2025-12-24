@@ -33,14 +33,13 @@ pipeline {
     }
     
     stage('Application Build') {
-        agent {
+      agent {
         docker {
             image 'node:7.8.0'
             args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
         }
-  }
-      
-      
+      }
+            
       steps {
         sh '''
            set -e
@@ -50,8 +49,23 @@ pipeline {
            chmod +x scripts/build.sh
            ./scripts/build.sh
           '''
-        }
-    } 
+      }
+    }
 
+    stage('Application Test') {
+      agent {
+        docker {
+            image 'node:7.8.0'
+            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+      }
+      steps {
+        sh '''
+            chmod +x scripts/test.sh
+            ./scripts/test.sh
+        '''
+      }
+    }
+    
   }
 }
