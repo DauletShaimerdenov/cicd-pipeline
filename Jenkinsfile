@@ -5,7 +5,8 @@ pipeline {
     PROJECT_NAME = "CI/CD Pipeline Demo"
     BUILD_NUMBER = "${env.BUILD_NUMBER}"
     IMAGE_NAME = "dauletshaimerdenov/node-demo"
-    IMAGE_TAG  = "${BUILD_NUMBER}"
+    IMAGE_TAG  = "${BUILD_NUMBER}"]
+    DOCKER_AGENT_IMAGE = "docker:20.10.24" // образ с Docker CLI
   }
 
   stages {
@@ -36,7 +37,7 @@ pipeline {
       agent {
         docker {
             image 'node:7.8.0'
-            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
             
@@ -56,7 +57,7 @@ pipeline {
       agent {
         docker {
             image 'node:7.8.0'
-            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
         }
       }
       steps {
