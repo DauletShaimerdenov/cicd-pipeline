@@ -94,6 +94,44 @@ stage('Application Test') {
     '''
   }
 }
+
+         stage('Build Docker Image') {
+            agent {
+                docker {
+                    image "${DOCKER_AGENT_IMAGE}"
+                    args "-v /var/run/docker.sock:/var/run/docker.sock"
+                }
+            }
+            steps {
+                script {
+                    echo "📦 Building Docker image..."
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+            stage('Push Docker Image') {
+            agent {
+                docker {
+                    image "${DOCKER_AGENT_IMAGE}"
+                    args "-v /var/run/docker.sock:/var/run/docker.sock"
+                }
+            }
+            steps {
+                script {
+                    echo "🔑 Logging in to Docker Hub..."
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    }
+
+                    echo "🚀 Pushing Docker image..."
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+
+                    // Тег latest
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+                    sh "docker push ${IMAGE_NAME}:latest"
+                }
+            }
     
   }
 }
