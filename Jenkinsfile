@@ -60,26 +60,25 @@ pipeline {
       }
     }
     stage('Application Test') {
-        agent {
-            docker {
-                image 'node:7.8.0'
-                args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
-            }
+      agent {
+        docker {
+          image 'node:7.8.0'
+          args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
         }
-        steps {
-            script {
-                echo "🧪 Running application tests..."
-                sh 'chmod +x scripts/test.sh'
-
-                withEnv(["NPM_CONFIG_CACHE=${WORKSPACE}/.npm"]) {
-                    sh '''
-                        set -e
-                        test -f scripts/test.sh
-                        ./scripts/test.sh
-                    '''
-                }
-            }
-        }
+      }
+      environment {
+          NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+      }
+      steps {
+        sh '''
+            echo "🚀 Installing dependencies as root..."
+            npm install
+            echo "🚀 Fixing permissions for Jenkins user..."
+            chown -R 1000:1000 node_modules
+            echo "🚀 Running tests as Jenkins..."
+            sudo -u jenkins npm test
+        '''
+      }
     }
     
   }
