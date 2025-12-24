@@ -5,7 +5,7 @@ pipeline {
     PROJECT_NAME = "CI/CD Pipeline Demo"
     BUILD_NUMBER = "${env.BUILD_NUMBER}"
     IMAGE_NAME = "dauletshaimerdenov/node-demo"
-    IMAGE_TAG  = "${BUILD_NUMBER}"]
+    IMAGE_TAG  = "${BUILD_NUMBER}"
     DOCKER_AGENT_IMAGE = "docker:20.10.24" // образ с Docker CLI
   }
 
