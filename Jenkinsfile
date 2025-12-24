@@ -1,11 +1,19 @@
 pipeline {
-  agent any
-
-  environment {
-    PROJECT_NAME = "CI/CD Pipeline"
-    BUILD_NUMBER = "${env.BUILD_NUMBER}"
+  agent {
+        docker {
+            image 'node:20'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
   }
+
   
+  environment {
+    PROJECT_NAME = "CI/CD Pipeline Demo"
+    BUILD_NUMBER = "${env.BUILD_NUMBER}"
+    IMAGE_NAME = "dauletshaimerdenov/node-demo"
+    IMAGE_TAG  = "${BUILD_NUMBER}"
+  }
+
   stages {
     
     stage('Cleanup Workspace') {
