@@ -36,60 +36,64 @@ pipeline {
       }
     }
     
-    stage('Application Build') {
-      agent {
-        docker {
-            image 'node:7.8.0'
-            args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
-        }
-      }
-            
-      steps {
-        script {
-          echo "🚀 Building application..."
-          sh 'chmod +x scripts/build.sh'
-
-          withEnv(["NPM_CONFIG_CACHE=${WORKSPACE}/.npm"]) {
-            sh '''
-                set -e
-                test -f scripts/build.sh
-                ./scripts/build.sh
-            '''
-          }
-        }
-      }
+stage('Application Build') {
+  agent {
+    docker {
+      image 'node:7.8.0'
+      args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
     }
-    stage('Fix Permissions after Build') {
-        agent { 
-          docker { 
-            image 'node:18' 
-            args '-u root:root' 
-          } 
-        }
-        steps {
-          sh 'chown -R ${JENKINS_UID}:${JENKINS_GID} node_modules'
-        }
-    }
-    
-    stage('Application Test') {
-      agent {
-        docker {
-          image 'node:18'
-          args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
-        }
-      }
-      environment {
-          NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
-      }
-      steps {
+  }
+  steps {
+    script {
+      echo "🚀 Building application with Node 7.8.0..."
+      sh 'chmod +x scripts/build.sh'
+      withEnv(["NPM_CONFIG_CACHE=${WORKSPACE}/.npm"]) {
         sh '''
-            echo "🚀 Installing dependencies..."
-            npm install
-            echo "🚀 Running tests..."
-            npm test
+          set -e
+          test -f scripts/build.sh
+          ./scripts/build.sh
         '''
       }
     }
+  }
+}
+stage('Fix Permissions after Build') {
+  agent {
+    docker {
+      image 'node:18'
+      args '-u root:root'
+    }
+  }
+  steps {
+    sh '''
+      if [ -d "node_modules" ]; then
+        chown -R ${JENKINS_UID}:${JENKINS_GID} node_modules
+      else
+        echo "⚠️ node_modules not found, skipping chown"
+      fi
+    '''
+  }
+}
+    
+stage('Application Test') {
+  agent {
+    docker {
+      image 'node:18'
+      args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
+    }
+  }
+  environment {
+    NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+  }
+  steps {
+    sh '''
+      echo "🚀 Installing dependencies..."
+      npm install
+      echo "🚀 Running tests..."
+      npm test
+    '''
+  }
+}
     
   }
 }
