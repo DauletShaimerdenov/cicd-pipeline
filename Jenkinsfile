@@ -60,30 +60,36 @@ pipeline {
       }
     }
     stage('Fix Permissions after Build') {
-        agent { docker { image 'node:18' args '-u root:root' } }
+        agent { 
+          docker { 
+            image 'node:18' 
+            args '-u root:root' 
+          } 
+        }
         steps {
           sh 'chown -R ${JENKINS_UID}:${JENKINS_GID} node_modules'
         }
     }
-stage('Application Test') {
-  agent {
-    docker {
-      image 'node:18'
-      args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
+    
+    stage('Application Test') {
+      agent {
+        docker {
+          image 'node:18'
+          args "-u ${env.JENKINS_UID}:${env.JENKINS_GID} -v /var/run/docker.sock:/var/run/docker.sock"
+        }
+      }
+      environment {
+          NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+      }
+      steps {
+        sh '''
+            echo "🚀 Installing dependencies..."
+            npm install
+            echo "🚀 Running tests..."
+            npm test
+        '''
+      }
     }
-  }
-  environment {
-      NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
-  }
-  steps {
-    sh '''
-        echo "🚀 Installing dependencies..."
-        npm install
-        echo "🚀 Running tests..."
-        npm test
-    '''
-  }
-}
     
   }
 }
