@@ -10,6 +10,7 @@ pipeline {
     IMAGE_TAG  = "${BUILD_NUMBER}"
     DOCKER_AGENT_IMAGE = "docker:20.10.24" // образ с Docker CLI
     NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+    DOCKER_HUB_CREDENTIALS = 'dockerhub'
   }
 
   stages {
